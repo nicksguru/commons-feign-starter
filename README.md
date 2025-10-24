@@ -31,6 +31,8 @@ Pick the most recent version from
 
 ## Documentation
 
+To browse the API documentation, click [here](https://nicks.guru/commons/feign-starter/apidocs).
+
 This software adheres to the BDD (Behavior-Driven Development) approach. See module usage examples in Cucumber
 test [scenarios](src/test/resources/cucumber/) and [steps](src/test/java/guru/nicks/cucumber/).
 
