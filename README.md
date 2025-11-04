@@ -8,13 +8,12 @@ Pick the most recent version from
 [Maven Central](https://central.sonatype.com/namespace/guru.nicks.commons), then use as follows:
 
 ```xml
-
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>guru.nicks.commons</groupId>
             <artifactId>bom</artifactId>
-            <version>25.11.3.0</version>
+            <version>25.11.4.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -22,10 +21,10 @@ Pick the most recent version from
 </dependencyManagement>
 
 <dependencies>
-<dependency>
-    <groupId>guru.nicks.commons</groupId>
-    <artifactId>feign-starter</artifactId>
-</dependency>
+    <dependency>
+        <groupId>guru.nicks.commons</groupId>
+        <artifactId>feign-starter</artifactId>
+    </dependency>
 </dependencies>
 ```
 
