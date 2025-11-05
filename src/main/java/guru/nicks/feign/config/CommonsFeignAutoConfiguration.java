@@ -33,7 +33,7 @@ import static guru.nicks.validation.dsl.ValiDsl.check;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(FeignRetryProperties.class)
 @Slf4j
-public class FeignAutoConfiguration {
+public class CommonsFeignAutoConfiguration {
 
     /**
      * Sets Feign log level (to override the default which is no logging at all). A bean is needed because the official
