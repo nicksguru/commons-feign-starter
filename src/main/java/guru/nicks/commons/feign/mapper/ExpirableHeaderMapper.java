@@ -34,5 +34,4 @@ public interface ExpirableHeaderMapper {
                 : Instant.now().plusSeconds(expiresInSeconds);
     }
 
-
 }

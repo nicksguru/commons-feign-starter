@@ -36,7 +36,7 @@ import static guru.nicks.commons.validation.dsl.ValiDsl.check;
 public class CommonsFeignAutoConfiguration {
 
     /**
-     * Sets Feign log level (to override the default which is no logging at all). A bean is needed because the official
+     * Sets Feign log level (to override the default which disabled logging). A bean is needed because the official
      * config setting {@code feign.client.config.default.loggerLevel} stopped working at some point.
      */
     @ConditionalOnMissingBean(Logger.Level.class)
