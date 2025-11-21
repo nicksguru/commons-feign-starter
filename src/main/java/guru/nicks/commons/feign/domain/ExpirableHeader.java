@@ -1,6 +1,6 @@
 package guru.nicks.commons.feign.domain;
 
-import guru.nicks.commons.utils.AuthUtils;
+import guru.nicks.commons.utils.auth.AuthUtils;
 
 import lombok.Builder;
 import lombok.Value;

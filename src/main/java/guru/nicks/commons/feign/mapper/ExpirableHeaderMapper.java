@@ -3,7 +3,7 @@ package guru.nicks.commons.feign.mapper;
 import guru.nicks.commons.feign.domain.ExpirableHeader;
 import guru.nicks.commons.mapper.DefaultMapStructConfig;
 import guru.nicks.commons.rest.v1.dto.OAuth2AccessTokenDto;
-import guru.nicks.commons.utils.AuthUtils;
+import guru.nicks.commons.utils.auth.AuthUtils;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

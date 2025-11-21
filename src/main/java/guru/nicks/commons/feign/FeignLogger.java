@@ -3,8 +3,8 @@ package guru.nicks.commons.feign;
 import guru.nicks.commons.ApplicationContextHolder;
 import guru.nicks.commons.log.domain.LogContext;
 import guru.nicks.commons.utils.ExceptionUtils;
-import guru.nicks.commons.utils.JsonUtils;
-import guru.nicks.commons.utils.TimeUtils;
+import guru.nicks.commons.utils.text.TimeUtils;
+import guru.nicks.commons.utils.json.JsonUtils;
 
 import feign.Logger;
 import feign.Util;
@@ -22,8 +22,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * Logs Feign client activity (requests and responses) in a way similar to what {@link Logger} does out-of-the box,
- * with the following differences:
+ * Logs Feign client activity (requests and responses) in a way similar to what {@link Logger} does out-of-the box, with
+ * the following differences:
  * <ul>
  *  <li>log level {@link Level#NONE} ({@code feign.client.config.default.loggerLevel})
  *      turns logging off; all others don't affect the logging behavior</li>

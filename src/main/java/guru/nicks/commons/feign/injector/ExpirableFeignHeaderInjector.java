@@ -4,7 +4,7 @@ import guru.nicks.commons.cache.AsyncCacheRefresher;
 import guru.nicks.commons.cache.CaffeineEntryExpirationCondition;
 import guru.nicks.commons.feign.domain.ExpirableHeader;
 import guru.nicks.commons.utils.Resilience4jUtils;
-import guru.nicks.commons.utils.TimeUtils;
+import guru.nicks.commons.utils.text.TimeUtils;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.github.resilience4j.decorators.Decorators;

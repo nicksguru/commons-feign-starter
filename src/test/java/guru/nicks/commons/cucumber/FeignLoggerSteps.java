@@ -3,7 +3,7 @@ package guru.nicks.commons.cucumber;
 import guru.nicks.commons.ApplicationContextHolder;
 import guru.nicks.commons.feign.FeignLogger;
 import guru.nicks.commons.utils.ExceptionUtils;
-import guru.nicks.commons.utils.JsonUtils;
+import guru.nicks.commons.utils.json.JsonUtils;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;

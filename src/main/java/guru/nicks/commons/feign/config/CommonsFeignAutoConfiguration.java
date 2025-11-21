@@ -3,7 +3,7 @@ package guru.nicks.commons.feign.config;
 import guru.nicks.commons.feign.BugfixSortPageableEncoder;
 import guru.nicks.commons.feign.FeignRetryer;
 import guru.nicks.commons.feign.domain.FeignRetryProperties;
-import guru.nicks.commons.utils.TimeUtils;
+import guru.nicks.commons.utils.text.TimeUtils;
 
 import feign.Logger;
 import feign.Request;
