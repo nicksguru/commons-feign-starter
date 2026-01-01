@@ -12,7 +12,6 @@ import feign.RetryableException;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import lombok.extern.jackson.Jacksonized;
 
 /**
  * Exception (such as raised by Feign) that was parsed (or not) to {@link #getRemoteException()}. The nested structure
@@ -28,7 +27,6 @@ import lombok.extern.jackson.Jacksonized;
  */
 @Value
 @NonFinal
-@Jacksonized
 @Builder(toBuilder = true)
 public class FailedRemoteCall {
 

@@ -5,13 +5,11 @@ import guru.nicks.commons.utils.auth.AuthUtils;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import lombok.extern.jackson.Jacksonized;
 
 import java.time.Instant;
 
 @Value
 @NonFinal
-@Jacksonized
 @Builder(toBuilder = true)
 public class ExpirableHeader {
 
