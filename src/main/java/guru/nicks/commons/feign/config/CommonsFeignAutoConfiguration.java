@@ -10,6 +10,7 @@ import guru.nicks.commons.feign.domain.FeignRetryProperties;
 import guru.nicks.commons.utils.text.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -29,7 +30,7 @@ import static guru.nicks.commons.validation.dsl.ValiDsl.check;
  * not be annotated with {@link Configuration @Configuration}), for example, to install a
  * {@link feign.RequestInterceptor}.
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @EnableConfigurationProperties(FeignRetryProperties.class)
 @Slf4j
 public class CommonsFeignAutoConfiguration {
