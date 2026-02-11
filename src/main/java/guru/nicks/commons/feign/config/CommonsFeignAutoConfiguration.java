@@ -1,14 +1,13 @@
 package guru.nicks.commons.feign.config;
 
-import guru.nicks.commons.feign.BugfixSortPageableEncoder;
-import guru.nicks.commons.feign.FeignRetryer;
-import guru.nicks.commons.feign.domain.FeignRetryProperties;
-import guru.nicks.commons.utils.text.TimeUtils;
-
 import feign.Logger;
 import feign.Request;
 import feign.Retryer;
 import feign.codec.Encoder;
+import guru.nicks.commons.feign.BugfixSortPageableEncoder;
+import guru.nicks.commons.feign.FeignRetryer;
+import guru.nicks.commons.feign.domain.FeignRetryProperties;
+import guru.nicks.commons.utils.text.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
