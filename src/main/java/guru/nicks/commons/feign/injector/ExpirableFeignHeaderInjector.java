@@ -153,9 +153,16 @@ public abstract class ExpirableFeignHeaderInjector
                     .onError(this::handleErrorEvent);
         }
 
-        ExpirableHeader header = Decorators.ofSupplier(this::obtainFreshHeader)
-                .withRetry(retrier)
-                .get();
+        ExpirableHeader header = null;
+        try {
+            header = Decorators.ofSupplier(this::obtainFreshHeader)
+                    .withRetry(retrier)
+                    .get();
+        }
+        // retry limit exceeded - original exception is re-thrown
+        catch (RuntimeException e) {
+            // do nothing - see event publisher config above
+        }
 
         if (header == null) {
             log.error("{} header refreshed: null value obtained, keeping using the cached value", getHeaderName());
