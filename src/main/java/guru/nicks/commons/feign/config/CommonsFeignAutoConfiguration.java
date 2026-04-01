@@ -1,14 +1,17 @@
 package guru.nicks.commons.feign.config;
 
+import guru.nicks.commons.feign.BugfixSortPageableEncoder;
+import guru.nicks.commons.feign.FeignRetryer;
+import guru.nicks.commons.feign.domain.FeignRetryProperties;
+import guru.nicks.commons.feign.mapper.ExpirableHeaderMapper;
+import guru.nicks.commons.utils.text.TimeUtils;
+
 import feign.Logger;
 import feign.Request;
 import feign.Retryer;
 import feign.codec.Encoder;
-import guru.nicks.commons.feign.BugfixSortPageableEncoder;
-import guru.nicks.commons.feign.FeignRetryer;
-import guru.nicks.commons.feign.domain.FeignRetryProperties;
-import guru.nicks.commons.utils.text.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,7 +45,7 @@ public class CommonsFeignAutoConfiguration {
     @ConditionalOnMissingBean(Logger.Level.class)
     @Bean
     public Logger.Level feignLoggerLevel() {
-        log.info("Setting Feign log level to FULL");
+        log.debug("Setting Feign log level to FULL");
         return Logger.Level.FULL;
     }
 
@@ -56,7 +59,7 @@ public class CommonsFeignAutoConfiguration {
     @Bean
     public Encoder feignEncoder(ObjectFactory<HttpMessageConverters> messageConverters,
             SpringDataWebProperties springDataWebProperties) {
-        log.info("Fixing Feign paging/sorting encoder");
+        log.debug("Fixing Feign paging/sorting encoder");
         return new BugfixSortPageableEncoder(new SpringEncoder(messageConverters), springDataWebProperties);
     }
 
@@ -77,7 +80,8 @@ public class CommonsFeignAutoConfiguration {
         check(feignRetryProperties.getMaxDelayBetweenAttempts().toMillis(),
                 "maxDelayBetweenAttempts").positiveOrZero();
 
-        log.info("Feign retry policy: {} attempts with delay changing from {} to {} between attempts",
+        log.info("Building {} bean - Feign retry policy: {} attempts with delay changing from {} to {}",
+                Retryer.class.getSimpleName(),
                 feignRetryProperties.getMaxAttempts(),
                 TimeUtils.humanFormatDuration(feignRetryProperties.getInitialDelayBetweenAttempts()),
                 TimeUtils.humanFormatDuration(feignRetryProperties.getMaxDelayBetweenAttempts()));
@@ -85,6 +89,12 @@ public class CommonsFeignAutoConfiguration {
         return new FeignRetryer(feignRetryProperties.getInitialDelayBetweenAttempts().abs().toMillis(),
                 feignRetryProperties.getMaxDelayBetweenAttempts().abs().toMillis(),
                 feignRetryProperties.getMaxAttempts());
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    public ExpirableHeaderMapper expirableHeaderMapper() {
+        return Mappers.getMapper(ExpirableHeaderMapper.class);
     }
 
 }
