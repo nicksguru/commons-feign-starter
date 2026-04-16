@@ -3,8 +3,8 @@ package guru.nicks.commons.feign;
 import guru.nicks.commons.ApplicationContextHolder;
 import guru.nicks.commons.log.domain.LogContext;
 import guru.nicks.commons.utils.ExceptionUtils;
-import guru.nicks.commons.utils.text.TimeUtils;
 import guru.nicks.commons.utils.json.JsonUtils;
+import guru.nicks.commons.utils.text.TimeUtils;
 
 import feign.Logger;
 import feign.Util;
