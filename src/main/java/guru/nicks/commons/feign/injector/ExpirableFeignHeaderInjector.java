@@ -12,6 +12,7 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.event.RetryOnErrorEvent;
 import io.github.resilience4j.retry.event.RetryOnRetryEvent;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -204,6 +205,30 @@ public abstract class ExpirableFeignHeaderInjector
                 // goes to logger implicitly, for stack trace
                 event.getLastThrowable());
         sendAlert(event.getLastThrowable());
+    }
+
+    /**
+     * Shuts down the scheduled executor service when the bean is destroyed.
+     */
+    @PreDestroy
+    public void shutdown() {
+        log.info("Shutting down Feign header injector cache refresher task");
+        cacheRefresherTask.shutdown();
+
+        try {
+            if (!cacheRefresherTask.awaitTermination(5, TimeUnit.SECONDS)) {
+                log.warn("Executor did not terminate in 5 seconds, forcing shutdown");
+                cacheRefresherTask.shutdownNow();
+
+                if (!cacheRefresherTask.awaitTermination(5, TimeUnit.SECONDS)) {
+                    log.error("Executor did not terminate after forced shutdown");
+                }
+            }
+        } catch (InterruptedException e) {
+            log.error("Interrupted during executor shutdown", e);
+            cacheRefresherTask.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
 }
