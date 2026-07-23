@@ -18,6 +18,7 @@ import java.util.Base64;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
  * Step definitions for testing {@link BasicAuthInjector}.
@@ -53,11 +54,8 @@ public class BasicAuthInjectorSteps {
                 .password(password)
                 .build();
 
-        try {
-            basicAuthInjector = new BasicAuthInjector(credentials);
-        } catch (Exception e) {
-            textWorld.setLastException(e);
-        }
+        textWorld.setLastException(catchThrowable(() ->
+                basicAuthInjector = new BasicAuthInjector(credentials)));
     }
 
     @Then("the header value prefix should be {string}")
