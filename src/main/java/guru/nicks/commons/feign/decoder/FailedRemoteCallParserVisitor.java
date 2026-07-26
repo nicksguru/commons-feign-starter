@@ -6,7 +6,7 @@ import guru.nicks.commons.exception.BusinessException;
 import guru.nicks.commons.exception.RootHttpStatus;
 import guru.nicks.commons.exception.http.ServiceTimeoutException;
 import guru.nicks.commons.feign.domain.FailedRemoteCall;
-import guru.nicks.commons.rest.v1.dto.BusinessExceptionDto;
+import guru.nicks.commons.rest.dto.BusinessExceptionDto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;

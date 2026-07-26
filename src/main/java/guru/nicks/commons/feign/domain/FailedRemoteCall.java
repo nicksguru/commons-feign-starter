@@ -5,7 +5,7 @@ import guru.nicks.commons.exception.http.BadRequestException;
 import guru.nicks.commons.exception.http.ForbiddenException;
 import guru.nicks.commons.exception.http.NotFoundException;
 import guru.nicks.commons.exception.user.UserNotFoundException;
-import guru.nicks.commons.rest.v1.dto.BusinessExceptionDto;
+import guru.nicks.commons.rest.dto.BusinessExceptionDto;
 
 import feign.FeignException;
 import feign.RetryableException;

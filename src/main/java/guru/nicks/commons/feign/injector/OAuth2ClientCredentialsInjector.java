@@ -3,7 +3,7 @@ package guru.nicks.commons.feign.injector;
 import guru.nicks.commons.auth.domain.BasicAuthCredentials;
 import guru.nicks.commons.feign.domain.ExpirableHeader;
 import guru.nicks.commons.feign.mapper.ExpirableHeaderMapper;
-import guru.nicks.commons.rest.v1.dto.OAuth2AccessTokenDto;
+import guru.nicks.commons.rest.dto.OAuth2AccessTokenDto;
 
 import am.ik.yavi.meta.ConstraintArguments;
 import jakarta.annotation.Nullable;
@@ -60,19 +60,14 @@ public abstract class OAuth2ClientCredentialsInjector extends ExpirableFeignHead
         this.tokenUrl = checkNotBlank(tokenUrl, _OAuth2ClientCredentialsInjectorArgumentsMeta.TOKENURL.name());
 
         checkNotNull(clientCredentials, _OAuth2ClientCredentialsInjectorArgumentsMeta.CLIENTCREDENTIALS.name());
+        // client secret ('password') may be missing
         checkNotBlank(clientCredentials.getUsername(),
                 _OAuth2AuthorizationCodeInjectorArgumentsMeta.CLIENTCREDENTIALS.name()
                         + "."
                         + BasicAuthCredentials.Fields.username);
-        // client secret may be missing
-        //        checkNotBlank(clientCredentials.getPassword(),
-        //                _OAuth2AuthorizationCodeInjectorArgumentsMeta.CLIENTCREDENTIALS.name()
-        //                        + "."
-        //                        + BasicAuthCredentials.Fields.password);
-
         this.scope = scope;
-        this.restClient = checkNotNull(restClient,
-                _OAuth2ClientCredentialsInjectorArgumentsMeta.RESTCLIENT.name());
+
+        this.restClient = checkNotNull(restClient, _OAuth2ClientCredentialsInjectorArgumentsMeta.RESTCLIENT.name());
         this.expirableHeaderMapper = checkNotNull(expirableHeaderMapper,
                 _OAuth2ClientCredentialsInjectorArgumentsMeta.EXPIRABLEHEADERMAPPER.name());
 

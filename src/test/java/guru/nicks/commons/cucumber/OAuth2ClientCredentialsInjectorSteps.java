@@ -5,7 +5,7 @@ import guru.nicks.commons.cucumber.world.TextWorld;
 import guru.nicks.commons.feign.domain.ExpirableHeader;
 import guru.nicks.commons.feign.injector.OAuth2ClientCredentialsInjector;
 import guru.nicks.commons.feign.mapper.ExpirableHeaderMapper;
-import guru.nicks.commons.rest.v1.dto.OAuth2AccessTokenDto;
+import guru.nicks.commons.rest.dto.OAuth2AccessTokenDto;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

@@ -3,7 +3,7 @@ package guru.nicks.commons.feign.decoder;
 import guru.nicks.commons.exception.BusinessException;
 import guru.nicks.commons.exception.SubclassBeforeSuperclassExceptionIterator;
 import guru.nicks.commons.feign.domain.FailedRemoteCall;
-import guru.nicks.commons.rest.v1.dto.BusinessExceptionDto;
+import guru.nicks.commons.rest.dto.BusinessExceptionDto;
 
 import feign.FeignException;
 import lombok.NonNull;
