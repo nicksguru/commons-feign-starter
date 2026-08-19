@@ -115,8 +115,10 @@ public class FeignLogger extends Logger {
         } else {
             try {
                 bodyData = Util.toByteArray(response.body().asInputStream());
+                // once response has been read, response MUST be rebuilt for further (re)reading by caller
+                response = response.toBuilder().body(bodyData).build();
             }
-            // sometimes, InterruptedIOException occurs indeed, and rethrowing it would break the retries
+            // sometimes, InterruptedIOException occurs; rethrowing it would break the retries
             catch (IOException e) {
                 bodyData = new byte[0];
             }
@@ -135,8 +137,8 @@ public class FeignLogger extends Logger {
             log(configKey, messagePrefix + ": %s", JsonUtils.maskSensitiveJsonFields(bodyData));
         }
 
-        // once response has been read, it should be rebuilt for further (re)reading by caller
-        return response.toBuilder().body(bodyData).build();
+        // original response if IOException occurred, or rebuilt response
+        return response;
     }
 
     @Override
