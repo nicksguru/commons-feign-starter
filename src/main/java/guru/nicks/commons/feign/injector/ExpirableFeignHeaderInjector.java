@@ -166,7 +166,7 @@ public abstract class ExpirableFeignHeaderInjector
         }
 
         if (header == null) {
-            log.error("{} header refreshed: null value obtained, keeping using the cached value", getHeaderName());
+            log.error("{} header refresh failure: new header is empty, will retry next time", getHeaderName());
         } else {
             possiblyScheduleAsyncRefresh(header.getExpirationDate());
         }
