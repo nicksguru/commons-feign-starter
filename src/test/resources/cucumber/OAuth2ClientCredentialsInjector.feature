@@ -105,3 +105,30 @@ Feature: OAuth2 Client Credentials Injector for Feign Clients
     When an OAuth2ClientCredentialsInjector is created with these parameters
     Then no exception should be thrown
     And the client credentials header name should be "Authorization"
+
+  Scenario: Stale token served when endpoint goes down after first success
+    Given a client credentials token URL "https://auth.example.com/oauth/token"
+    And client credentials with client ID "test-client" and client secret "test-secret"
+    And a client credentials RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 1 seconds
+    When an OAuth2ClientCredentialsInjector is created with these parameters
+    Then no exception should be thrown
+    When the client credentials header value is obtained
+    Then the client credentials header value should be "Bearer test-access-token"
+    And sleep 1100 milliseconds
+    And the client credentials RestOperations mock starts throwing RestClientException
+    When the client credentials header value is obtained
+    Then the client credentials header value should be "Bearer test-access-token"
+
+  Scenario: Fail fast when endpoint is down beyond stale window
+    Given a client credentials token URL "https://auth.example.com/oauth/token"
+    And client credentials with client ID "test-client" and client secret "test-secret"
+    And a client credentials stale window 300 milliseconds
+    And a client credentials RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 1 seconds
+    When an OAuth2ClientCredentialsInjector is created with these parameters
+    Then no exception should be thrown
+    When the client credentials header value is obtained
+    Then the client credentials header value should be "Bearer test-access-token"
+    And sleep 1500 milliseconds
+    And the client credentials RestOperations mock starts throwing RestClientException
+    When the client credentials header value is obtained
+    Then FeignHeaderRefreshException should be thrown

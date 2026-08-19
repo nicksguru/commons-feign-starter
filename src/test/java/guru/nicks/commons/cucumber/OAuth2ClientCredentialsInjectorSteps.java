@@ -10,6 +10,7 @@ import guru.nicks.commons.rest.dto.OAuth2AccessTokenDto;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +44,7 @@ public class OAuth2ClientCredentialsInjectorSteps {
     private String tokenUrl;
     private BasicAuthCredentials clientCredentials;
     private String scope;
+    private Long staleWindowMs;
 
     private RestOperations restClient;
     private ExpirableHeaderMapper expirableHeaderMapper;
@@ -126,6 +129,16 @@ public class OAuth2ClientCredentialsInjectorSteps {
         restClient = null;
     }
 
+    @Given("a client credentials stale window {long} milliseconds")
+    public void givenStaleWindow(long staleWindowMs) {
+        this.staleWindowMs = staleWindowMs;
+    }
+
+    @Given("the client credentials RestOperations mock starts throwing RestClientException")
+    public void givenRestClientExceptionStarts() {
+        setupRestClientException();
+    }
+
     @Given("a client credentials ExpirableHeaderMapper null")
     public void givenNullExpirableHeaderMapper() {
         expirableHeaderMapper = null;
@@ -145,8 +158,24 @@ public class OAuth2ClientCredentialsInjectorSteps {
             }
 
             injector = new TestOAuth2ClientCredentialsInjector(tokenUrl, clientCredentials, scope,
-                    restClient, expirableHeaderMapper);
+                    restClient, expirableHeaderMapper,
+                    (staleWindowMs == null) ? null : Duration.ofMillis(staleWindowMs));
         }));
+    }
+
+    @When("the client credentials header value is obtained")
+    public void whenHeaderValueIsObtained() {
+        String value = null;
+        Throwable thrown = null;
+
+        try {
+            value = injector.getHeaderValue();
+        } catch (RuntimeException e) {
+            thrown = e;
+        }
+
+        textWorld.setLastException(thrown);
+        textWorld.setText(value);
     }
 
     @Then("the client credentials header name should be {string}")
@@ -154,6 +183,13 @@ public class OAuth2ClientCredentialsInjectorSteps {
         assertThat(injector.getHeaderName())
                 .as("header name")
                 .isEqualTo(expectedHeaderName);
+    }
+
+    @Then("the client credentials header value should be {string}")
+    public void thenHeaderValueShouldBe(String expectedValue) {
+        assertThat(textWorld.getText())
+                .as("header value")
+                .isEqualTo(expectedValue);
     }
 
     @Then("the client credentials header value should start with {string}")
@@ -290,14 +326,29 @@ public class OAuth2ClientCredentialsInjectorSteps {
      */
     private static class TestOAuth2ClientCredentialsInjector extends OAuth2ClientCredentialsInjector {
 
+        private final Duration staleWindowOverride;
+
         public TestOAuth2ClientCredentialsInjector(String tokenUrl, BasicAuthCredentials clientCredentials,
-                String scope, RestOperations restClient, ExpirableHeaderMapper expirableHeaderMapper) {
+                String scope, RestOperations restClient, ExpirableHeaderMapper expirableHeaderMapper,
+                @Nullable Duration staleWindowOverride) {
             super(tokenUrl, clientCredentials, scope, restClient, expirableHeaderMapper);
+            this.staleWindowOverride = staleWindowOverride;
         }
 
         @Override
         protected void sendAlert(Throwable t) {
             // do nothing in tests
+        }
+
+        @Override
+        public Duration getStaleWindow() {
+            return (staleWindowOverride != null) ? staleWindowOverride : super.getStaleWindow();
+        }
+
+        // deterministic tests: no preemptive async refresh
+        @Override
+        public int getAsyncRefreshTtlPercent() {
+            return 0;
         }
 
     }
