@@ -3,7 +3,7 @@ package guru.nicks.commons.feign;
 import feign.CollectionFormat;
 import feign.RequestTemplate;
 import feign.codec.Encoder;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.cloud.openfeign.support.PageableSpringEncoder;
 
 import java.lang.reflect.Type;
@@ -15,7 +15,7 @@ import java.lang.reflect.Type;
  */
 public class BugfixSortPageableEncoder extends PageableSpringEncoder {
 
-    public BugfixSortPageableEncoder(Encoder delegate, SpringDataWebProperties springDataWebProperties) {
+    public BugfixSortPageableEncoder(Encoder delegate, DataWebProperties springDataWebProperties) {
         super(delegate);
         setPageParameter(springDataWebProperties.getPageable().getPageParameter());
         setSizeParameter(springDataWebProperties.getPageable().getSizeParameter());

@@ -1,4 +1,4 @@
-@NonNullApi
+@NullMarked
 package guru.nicks.commons.feign.injector;
 
-import org.springframework.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;
