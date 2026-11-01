@@ -11,15 +11,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestOperations;
 
 import static guru.nicks.commons.validation.dsl.ValiDsl.checkNotBlank;
 import static guru.nicks.commons.validation.dsl.ValiDsl.checkNotNull;
@@ -39,7 +38,7 @@ public abstract class OAuth2ClientCredentialsInjector extends ExpirableFeignHead
     private final String scope;
     private final HttpHeaders clientAuthHeaders;
 
-    private final RestOperations restClient;
+    private final RestClient restClient;
     private final ExpirableHeaderMapper expirableHeaderMapper;
 
     /**
@@ -56,7 +55,7 @@ public abstract class OAuth2ClientCredentialsInjector extends ExpirableFeignHead
      */
     @ConstraintArguments
     protected OAuth2ClientCredentialsInjector(String tokenUrl, BasicAuthCredentials clientCredentials,
-            @Nullable String scope, RestOperations restClient, ExpirableHeaderMapper expirableHeaderMapper) {
+            @Nullable String scope, RestClient restClient, ExpirableHeaderMapper expirableHeaderMapper) {
         this.tokenUrl = checkNotBlank(tokenUrl, _OAuth2ClientCredentialsInjectorArgumentsMeta.TOKENURL.name());
 
         checkNotNull(clientCredentials, _OAuth2ClientCredentialsInjectorArgumentsMeta.CLIENTCREDENTIALS.name());
@@ -111,8 +110,12 @@ public abstract class OAuth2ClientCredentialsInjector extends ExpirableFeignHead
         ResponseEntity<OAuth2AccessTokenDto> tokenResponse;
 
         try {
-            tokenResponse = restClient.exchange(tokenUrl, HttpMethod.POST,
-                    new HttpEntity<>(tokenFormData, clientAuthHeaders), OAuth2AccessTokenDto.class);
+            tokenResponse = restClient.method(HttpMethod.POST)
+                    .uri(tokenUrl)
+                    .headers(headers -> headers.addAll(clientAuthHeaders))
+                    .body(tokenFormData)
+                    .retrieve()
+                    .toEntity(OAuth2AccessTokenDto.class);
         } catch (RestClientException e) {
             throw new RestClientException("Failed to fetch access token using client credentials from '"
                     + tokenUrl

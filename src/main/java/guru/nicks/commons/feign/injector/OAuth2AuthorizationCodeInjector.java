@@ -12,15 +12,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestOperations;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,7 +54,7 @@ public abstract class OAuth2AuthorizationCodeInjector extends ExpirableFeignHead
     private final HttpHeaders clientAuthHeaders;
     private final String clientId;
 
-    private final RestOperations restClient;
+    private final RestClient restClient;
     private final ExpirableHeaderMapper expirableHeaderMapper;
 
 
@@ -79,7 +78,7 @@ public abstract class OAuth2AuthorizationCodeInjector extends ExpirableFeignHead
     protected OAuth2AuthorizationCodeInjector(String tokenUrl, BasicAuthCredentials clientCredentials,
             @Nullable String scope, BasicAuthCredentials userCredentials,
             String authorizationUrl, String redirectUrl,
-            RestOperations restClient, ExpirableHeaderMapper expirableHeaderMapper) {
+            RestClient restClient, ExpirableHeaderMapper expirableHeaderMapper) {
         this.tokenUrl = checkNotBlank(tokenUrl, _OAuth2AuthorizationCodeInjectorArgumentsMeta.TOKENURL.name());
 
         checkNotNull(clientCredentials, _OAuth2AuthorizationCodeInjectorArgumentsMeta.CLIENTCREDENTIALS.name());
@@ -161,8 +160,12 @@ public abstract class OAuth2AuthorizationCodeInjector extends ExpirableFeignHead
         ResponseEntity<String> authResponse;
 
         try {
-            authResponse = restClient.exchange(authorizationUrl, HttpMethod.POST,
-                    new HttpEntity<>(authFormData, authHeaders), String.class);
+            authResponse = restClient.method(HttpMethod.POST)
+                    .uri(authorizationUrl)
+                    .headers(headers -> headers.addAll(authHeaders))
+                    .body(authFormData)
+                    .retrieve()
+                    .toEntity(String.class);
         } catch (RestClientException e) {
             throw new RestClientException("Failed to obtain authorization code from '" + authorizationUrl
                     + "': " + e.getMessage(), e);
@@ -231,8 +234,12 @@ public abstract class OAuth2AuthorizationCodeInjector extends ExpirableFeignHead
         ResponseEntity<OAuth2AccessTokenDto> tokenResponse;
 
         try {
-            tokenResponse = restClient.exchange(tokenUrl, HttpMethod.POST,
-                    new HttpEntity<>(tokenFormData, clientAuthHeaders), OAuth2AccessTokenDto.class);
+            tokenResponse = restClient.method(HttpMethod.POST)
+                    .uri(tokenUrl)
+                    .headers(headers -> headers.addAll(clientAuthHeaders))
+                    .body(tokenFormData)
+                    .retrieve()
+                    .toEntity(OAuth2AccessTokenDto.class);
         } catch (RestClientException e) {
             throw new RestClientException("Failed to exchange authorization code for access token from '"
                     + tokenUrl

@@ -8,8 +8,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-123" in Location header
-    And an authorization code RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
+    And a mock HTTP server that returns authorization code "auth-code-123" in Location header
+    And an authorization code mock HTTP server that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And the authorization code header name should be "Authorization"
@@ -22,8 +22,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-456" in response body
-    And an authorization code RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
+    And a mock HTTP server that returns authorization code "auth-code-456" in response body
+    And an authorization code mock HTTP server that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And the authorization code header name should be "Authorization"
@@ -36,8 +36,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
     And an authorization code scope "read write"
-    And a RestOperations mock that returns authorization code "auth-code-789" in Location header
-    And an authorization code RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
+    And a mock HTTP server that returns authorization code "auth-code-789" in Location header
+    And an authorization code mock HTTP server that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And the authorization code header name should be "Authorization"
@@ -49,8 +49,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-101" in Location header
-    And an authorization code RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
+    And a mock HTTP server that returns authorization code "auth-code-101" in Location header
+    And an authorization code mock HTTP server that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And the authorization code header name should be "Authorization"
@@ -62,7 +62,7 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that throws RestClientException when requesting authorization code
+    And a mock HTTP server that throws RestClientException when requesting authorization code
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And obtaining an authorization code fresh header should throw RestClientException
@@ -73,8 +73,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-202" in Location header
-    And an authorization code RestOperations mock that returns a 401 response when exchanging code for token
+    And a mock HTTP server that returns authorization code "auth-code-202" in Location header
+    And an authorization code mock HTTP server that returns a 401 response when exchanging code for token
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And obtaining an authorization code fresh header should throw RestClientException
@@ -85,8 +85,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-303" in Location header
-    And an authorization code RestOperations mock that throws RestClientException when exchanging code for token
+    And a mock HTTP server that returns authorization code "auth-code-303" in Location header
+    And an authorization code mock HTTP server that throws RestClientException when exchanging code for token
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And obtaining an authorization code fresh header should throw RestClientException
@@ -97,7 +97,7 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns an authorization response without authorization code
+    And a mock HTTP server that returns an authorization response without authorization code
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And obtaining an authorization code fresh header should throw RestClientException
@@ -108,8 +108,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-404" in Location header
-    And an authorization code RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
+    And a mock HTTP server that returns authorization code "auth-code-404" in Location header
+    And an authorization code mock HTTP server that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And the authorization code header should have an expiration date
@@ -120,8 +120,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -131,8 +131,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -142,8 +142,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -153,8 +153,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL ""
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -164,8 +164,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -175,8 +175,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials null
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -186,8 +186,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -197,8 +197,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password ""
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -208,18 +208,18 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials null
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
-  Scenario: Validation error for null RestOperations
+  Scenario: Validation error for null RestClient
     Given an authorization code token URL "https://auth.example.com/oauth/token"
     And an authorization URL "https://auth.example.com/oauth/authorize"
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And an authorization code RestOperations mock null
+    And an authorization code RestClient null
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
 
@@ -229,8 +229,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "test-client" and client secret "test-secret"
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code in Location header
-    And an authorization code RestOperations mock that returns a successful token response
+    And a mock HTTP server that returns authorization code in Location header
+    And an authorization code mock HTTP server that returns a successful token response
     And an authorization code ExpirableHeaderMapper null
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then IllegalArgumentException should be thrown
@@ -241,8 +241,8 @@ Feature: OAuth2 Authorization Code Injector for Feign Clients
     And a redirect URL "https://client.example.com/callback"
     And authorization code client credentials with client ID "public-client" and client secret null
     And user credentials with username "testuser" and password "testpass"
-    And a RestOperations mock that returns authorization code "auth-code-505" in Location header
-    And an authorization code RestOperations mock that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
+    And a mock HTTP server that returns authorization code "auth-code-505" in Location header
+    And an authorization code mock HTTP server that returns a successful token response with access token "test-access-token" and expires in 3600 seconds
     When an OAuth2AuthorizationCodeInjector is created with these parameters
     Then no exception should be thrown
     And the authorization code header name should be "Authorization"

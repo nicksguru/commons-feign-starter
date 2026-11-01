@@ -13,26 +13,41 @@ import io.cucumber.java.en.When;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestOperations;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.web.client.ExpectedCount;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.ResponseCreator;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Step definitions for testing {@link OAuth2ClientCredentialsInjector}. All step patterns are prefixed with 'client
- * credentials' to avoid duplicates with authorization code flow steps.
+ * credentials' to avoid duplicates with authorization code flow steps. HTTP layer is mocked with
+ * {@link MockRestServiceServer} bound to a real {@link RestClient}.
  */
 @RequiredArgsConstructor
 public class OAuth2ClientCredentialsInjectorSteps {
@@ -46,7 +61,13 @@ public class OAuth2ClientCredentialsInjectorSteps {
     private String scope;
     private Long staleWindowMs;
 
-    private RestOperations restClient;
+    private RestClient restClient;
+    private MockRestServiceServer mockServer;
+
+    /**
+     * Response for the token endpoint, delegated to at request time so later steps can override it mid-scenario.
+     */
+    private ResponseCreator nextTokenResponse;
     private ExpirableHeaderMapper expirableHeaderMapper;
     private String expectedAccessToken;
     private Long expectedExpiresIn;
@@ -54,6 +75,22 @@ public class OAuth2ClientCredentialsInjectorSteps {
 
     private boolean expirableHeaderMapperExplicitlySetToNull;
     private TestOAuth2ClientCredentialsInjector injector;
+
+    /**
+     * Parses an url-encoded form body into a map.
+     */
+    private static Map<String, String> parseFormData(String body) {
+        Map<String, String> formData = new LinkedHashMap<>();
+
+        for (String pair : body.split("&")) {
+            int separatorIndex = pair.indexOf('=');
+            formData.put(
+                    URLDecoder.decode(pair.substring(0, separatorIndex), StandardCharsets.UTF_8),
+                    URLDecoder.decode(pair.substring(separatorIndex + 1), StandardCharsets.UTF_8));
+        }
+
+        return formData;
+    }
 
     @Given("a client credentials token URL {string}")
     public void givenTokenUrl(String tokenUrl) {
@@ -93,39 +130,39 @@ public class OAuth2ClientCredentialsInjectorSteps {
         this.scope = scope;
     }
 
-    @Given("a client credentials RestOperations mock that returns a successful token response with access token {string} and expires in {long} seconds")
+    @Given("a client credentials mock HTTP server that returns a successful token response with access token {string} and expires in {long} seconds")
     public void givenSuccessfulTokenResponse(String accessToken, long expiresIn) {
-        restClient = mock(RestOperations.class);
+        restClient = createRestClientWithMockServer();
         expectedAccessToken = accessToken;
         expectedExpiresIn = expiresIn;
         tokenResponseStatus = HttpStatus.OK;
         setupSuccessfulTokenResponse();
     }
 
-    @Given("a client credentials RestOperations mock that returns a successful token response")
+    @Given("a client credentials mock HTTP server that returns a successful token response")
     public void givenSuccessfulTokenResponseSimple() {
-        restClient = mock(RestOperations.class);
+        restClient = createRestClientWithMockServer();
         expectedAccessToken = "default-token";
         expectedExpiresIn = 3600L;
         tokenResponseStatus = HttpStatus.OK;
         setupSuccessfulTokenResponse();
     }
 
-    @Given("a client credentials RestOperations mock that returns a {int} response")
+    @Given("a client credentials mock HTTP server that returns a {int} response")
     public void givenErrorResponse(int statusCode) {
-        restClient = mock(RestOperations.class);
+        restClient = createRestClientWithMockServer();
         tokenResponseStatus = HttpStatus.valueOf(statusCode);
         setupErrorResponse();
     }
 
-    @Given("a client credentials RestOperations mock that throws RestClientException")
+    @Given("a client credentials mock HTTP server that throws RestClientException")
     public void givenRestClientException() {
-        restClient = mock(RestOperations.class);
+        restClient = createRestClientWithMockServer();
         setupRestClientException();
     }
 
-    @Given("a client credentials RestOperations mock null")
-    public void givenNullRestOperations() {
+    @Given("a client credentials RestClient null")
+    public void givenNullRestClient() {
         restClient = null;
     }
 
@@ -134,9 +171,10 @@ public class OAuth2ClientCredentialsInjectorSteps {
         this.staleWindowMs = staleWindowMs;
     }
 
-    @Given("the client credentials RestOperations mock starts throwing RestClientException")
+    @Given("the client credentials mock HTTP server starts throwing RestClientException")
     public void givenRestClientExceptionStarts() {
-        setupRestClientException();
+        // the expectation registered earlier delegates to the mutable response creator - just flip it
+        nextTokenResponse = withException(new IOException("Simulated connection error"));
     }
 
     @Given("a client credentials ExpirableHeaderMapper null")
@@ -233,6 +271,18 @@ public class OAuth2ClientCredentialsInjectorSteps {
     }
 
     /**
+     * Creates a real {@link RestClient} backed by {@link MockRestServiceServer}.
+     */
+    private RestClient createRestClientWithMockServer() {
+        var builder = RestClient.builder();
+        mockServer = MockRestServiceServer.bindTo(builder)
+                .ignoreExpectOrder(true)
+                .build();
+
+        return builder.build();
+    }
+
+    /**
      * Obtains a fresh header from the injector.
      */
     private ExpirableHeader obtainFreshHeaderFromInjector() {
@@ -240,66 +290,67 @@ public class OAuth2ClientCredentialsInjectorSteps {
     }
 
     /**
-     * Sets up restClient  mock to return a successful token response.
+     * Sets up the mock server to return a successful token response.
      */
     private void setupSuccessfulTokenResponse() {
-        when(restClient.exchange(
-                eq(tokenUrl),
-                eq(HttpMethod.POST),
-                any(HttpEntity.class),
-                eq(OAuth2AccessTokenDto.class)
-        )).thenAnswer(invocation -> {
-            // verify the request contains grant_type=client_credentials
-            HttpEntity<?> requestEntity = invocation.getArgument(2);
-            MultiValueMap<String, String> formData = (MultiValueMap<String, String>) requestEntity.getBody();
+        // invalid token URL - constructor validation fails before any HTTP call, expectation would never match
+        if (tokenUrl == null) {
+            return;
+        }
 
-            assertThat(formData)
-                    .as("form data")
-                    .isNotNull();
-
-            assertThat(formData.getFirst("grant_type"))
-                    .as("grant_type")
-                    .isEqualTo("client_credentials");
-
-            // verify scope is included if provided
-            if (StringUtils.isNotBlank(scope)) {
-                assertThat(formData.getFirst("scope"))
-                        .as("scope")
-                        .isEqualTo(scope);
-            }
-
-            // return successful response
-            OAuth2AccessTokenDto tokenDto = OAuth2AccessTokenDto.builder()
-                    .accessToken(expectedAccessToken)
-                    .tokenType("Bearer")
-                    .expiresInSeconds(expectedExpiresIn)
-                    .build();
-            return ResponseEntity.ok(tokenDto);
-        });
+        String responseJson =
+                "{\"access_token\":\"" + expectedAccessToken + "\",\"token_type\":\"Bearer\",\"expires_in\":"
+                        + expectedExpiresIn + "}";
+        nextTokenResponse = withSuccess(responseJson, MediaType.APPLICATION_JSON);
+        registerTokenEndpointExpectation();
     }
 
     /**
-     * Sets up restClient  mock to return an error response.
+     * Sets up the mock server to return an error response.
      */
     private void setupErrorResponse() {
-        when(restClient.exchange(
-                eq(tokenUrl),
-                eq(HttpMethod.POST),
-                any(HttpEntity.class),
-                eq(OAuth2AccessTokenDto.class)
-        )).thenReturn(new ResponseEntity<>(tokenResponseStatus));
+        nextTokenResponse = withStatus(tokenResponseStatus);
+        registerTokenEndpointExpectation();
     }
 
     /**
-     * Sets up restClient  mock to throw RestClientException.
+     * Makes subsequent token requests fail with a connection error (surfaces as a {@link RestClientException} subtype).
+     * The endpoint expectation registered earlier delegates to the mutable response creator, because
+     * {@link MockRestServiceServer} forbids adding expectations after actual requests are made.
      */
     private void setupRestClientException() {
-        when(restClient.exchange(
-                any(String.class),
-                any(HttpMethod.class),
-                any(HttpEntity.class),
-                any(Class.class)
-        )).thenThrow(new org.springframework.web.client.RestClientException("Simulated REST client error"));
+        nextTokenResponse = withException(new IOException("Simulated connection error"));
+        registerTokenEndpointExpectation();
+    }
+
+    /**
+     * Registers the token endpoint expectation. The response creator is delegated to at request time, letting later
+     * steps override {@link #nextTokenResponse} mid-scenario. The count is effectively unbounded because the injector
+     * wraps token loading in a Resilience4j retry, issuing more requests than one per header read.
+     */
+    private void registerTokenEndpointExpectation() {
+        mockServer.expect(ExpectedCount.manyTimes(), requestTo(tokenUrl))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(this::assertTokenRequestFormData)
+                .andRespond(request -> nextTokenResponse.createResponse(request));
+    }
+
+    /**
+     * Asserts that the token request carries the expected form data.
+     */
+    private void assertTokenRequestFormData(ClientHttpRequest request) {
+        Map<String, String> formData = parseFormData(((MockClientHttpRequest) request).getBodyAsString());
+
+        assertThat(formData.get("grant_type"))
+                .as("grant_type")
+                .isEqualTo("client_credentials");
+
+        if (StringUtils.isNotBlank(scope)) {
+            assertThat(formData.get("scope"))
+                    .as("scope")
+                    .isEqualTo(scope);
+        }
     }
 
     /**
@@ -329,7 +380,7 @@ public class OAuth2ClientCredentialsInjectorSteps {
         private final Duration staleWindowOverride;
 
         public TestOAuth2ClientCredentialsInjector(String tokenUrl, BasicAuthCredentials clientCredentials,
-                String scope, RestOperations restClient, ExpirableHeaderMapper expirableHeaderMapper,
+                String scope, RestClient restClient, ExpirableHeaderMapper expirableHeaderMapper,
                 @Nullable Duration staleWindowOverride) {
             super(tokenUrl, clientCredentials, scope, restClient, expirableHeaderMapper);
             this.staleWindowOverride = staleWindowOverride;
